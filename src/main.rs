@@ -10,7 +10,7 @@ async fn main() -> io::Result<()> {
     // Get the port number to listen on (required for heroku deployment).
     let port = env::var("PORT").unwrap_or_else(|_| "3000".to_string());
 
-    let addr = format!("127.0.0.1:{}", port);
+    let addr = format!("0.0.0.0:{}", port);
     let mut listener = TcpListener::bind(addr).await.unwrap();
 
     println!("listening on port {}...", port);
