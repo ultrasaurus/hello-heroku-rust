@@ -27,3 +27,12 @@ Creating app... done, ⬢ peaceful-gorge-05620
 Setting buildpack to emk/rust... done
 https://peaceful-gorge-05620.herokuapp.com/ | https://git.heroku.com/peaceful-gorge-05620.git
 ```
+
+Make a Procfile so heroku knows our entrypoint
+```
+echo "web: ./target/release/hello_rust" >> Procfile
+```
+
+```
+cargo add tokio
+```
