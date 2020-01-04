@@ -1,1 +1,1 @@
-web: ./target/release/hello_rust
+web: ./target/debug/hello_rust
