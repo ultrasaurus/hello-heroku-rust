@@ -11,7 +11,6 @@ futures = "0.3.1"
 
 [dependencies.tokio]
 version = "0.2.6"
-features = ["full"]
-#features = ["tcp", "dns", "macros"]
+features = ["tcp", "dns", "macros", "io-util"]
 
 
