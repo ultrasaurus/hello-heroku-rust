@@ -1,6 +1,7 @@
 // example code from:
 // https://docs.rs/tokio/0.2.6/tokio/net/struct.TcpListener.html
 // https://docs.rs/tokio/0.2.6/tokio/net/struct.TcpStream.html
+use futures::prelude::*;
 use std::env;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::net::{TcpListener, TcpStream};
@@ -43,17 +44,25 @@ async fn process_socket(socket: TcpStream) {
 }
 
 #[tokio::main]
-async fn main() -> io::Result<()> {
+async fn main() {
     // Get the port number to listen on (required for heroku deployment).
     let port = env::var("PORT").unwrap_or_else(|_| "1234".to_string());
 
     let addr = format!("0.0.0.0:{}", port);
     let mut listener = TcpListener::bind(addr).await.unwrap();
+    //let mut socket_futures = Vec::new();
 
     println!("listening on port {}...", port);
     loop {
-        let (socket, _) = listener.accept().await.unwrap();
-        println!("socket connection accepted");
-        process_socket(socket).await;
+        let result = listener.accept().await;
+        if let Ok(listen) = result {
+            let (socket, addr) = listen;
+            println!("socket connection accepted, {}", addr);
+            // socket_futures.push(process_socket(socket));
+            process_socket(socket);
+        }
     }
+    // for future in socket_futures {
+    //     future.await;
+    // }
 }
