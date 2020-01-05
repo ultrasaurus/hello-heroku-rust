@@ -51,8 +51,8 @@ async fn main() {
     let addr = format!("0.0.0.0:{}", port);
     let mut listener = TcpListener::bind(addr).await.unwrap();
 
-    println!("listening on port {}...", port);
     loop {
+        println!("listening on port {}...", port);
         let result = listener.accept().await;
         if let Ok(listen) = result {
             let (socket, addr) = listen;
