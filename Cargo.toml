@@ -7,10 +7,6 @@ edition = "2018"
 [dependencies]
 futures = "0.3.1"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies.tokio]
 version = "0.2.6"
-#features = ["tcp", "dns", "macros", "io-util"]
-features = ["full"]
-
+features = ["tcp", "dns", "macros", "io-util"]
