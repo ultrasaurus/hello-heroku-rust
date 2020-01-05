@@ -16,10 +16,14 @@ async fn process_socket(socket: TcpStream) {
         result = buffed_socket.read_line(&mut request).await;
 
         if let Ok(num_bytes) = result {
-            let end_chars = &request[request.len() - 4..];
-            if end_chars == "\r\n\r\n" {
-                break;
-            };
+            println!("read {} bytes", num_bytes);
+            println!("request.len() = {} ", request.len());
+            if request.len() >= 4 {
+                let end_chars = &request[request.len() - 4..];
+                if end_chars == "\r\n\r\n" {
+                    break;
+                };
+            }
         }
     }
     if let Err(e) = result {
@@ -47,6 +51,7 @@ async fn main() -> io::Result<()> {
     println!("listening on port {}...", port);
     loop {
         let (socket, _) = listener.accept().await.unwrap();
+        println!("socket connection accepted");
         process_socket(socket).await;
     }
 }
