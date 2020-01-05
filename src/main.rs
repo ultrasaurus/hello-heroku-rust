@@ -35,10 +35,13 @@ async fn process_socket(socket: TcpStream) {
         return;
     }
     println!("request: {}", request);
-
-    let write_result = buffed_socket
-        .write_all(b"HTTP/1.1 200\n\n<h1>Hello!</h1>")
-        .await;
+    let html = "<h1>Hello!</h1>";
+    let response = format!(
+        "HTTP/1.1 200\r\nContent-Length: {}\r\n\r\n{}",
+        html.len(),
+        html
+    );
+    let write_result = buffed_socket.write_all(response.as_bytes()).await;
     if let Err(e) = write_result {
         println!("failed to write, err: {}", e);
     }
