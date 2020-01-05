@@ -2,26 +2,43 @@
 // https://docs.rs/tokio/0.2.6/tokio/net/struct.TcpListener.html
 // https://docs.rs/tokio/0.2.6/tokio/net/struct.TcpStream.html
 use std::env;
+use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::prelude::*;
+use tokio::stream::StreamExt;
+
+// use std::io::Cursor;
 
 async fn process_socket(socket: TcpStream) {
-    let mut buffed_socket = tokio::io::BufReader::new(socket);
-    let mut request = Vec::new();
-
-    let read_result = buffed_socket.read_to_end(&mut request).await;
-    if let Err(e) = read_result {
-        println!("failed to read from socket, err: {}", e);
-    } else {
-        let request_str = String::from_utf8_lossy(&request);
-        println!("request: {}", request_str);
-        let write_result = buffed_socket
-            .write_all(b"HTTP/1.1 200\n\n<h1>Hello!</h1>")
-            .await;
-        if let Err(e) = write_result {
-            println!("failed to write, err: {}", e);
+    let mut buffed_socket = BufReader::new(socket);
+    //let mut request = Vec::new();
+    //let mut request;
+    let mut lines = Vec::new();
+    // let cursor = Cursor::new(buffed_socket);
+    
+    buffed_socket.lines().map(|result| 
+        if let Err(e) = result {
+            println!("failed to read from socket, err: {}", e);
+            return;
+        } else {
+            let line = result.unwrap();
+            lines.push();
         }
-    }
+    );
+
+        res.unwrap()
+    );
+
+
+    // let request_str = "foo".to_string();
+    // //let request_str = String::from_utf8_lossy(&request);
+    // println!("request: {}", request_str);
+    // let write_result = buffed_socket
+    //     .write_all(b"HTTP/1.1 200\n\n<h1>Hello!</h1>")
+    //     .await;
+    // if let Err(e) = write_result {
+    //     println!("failed to write, err: {}", e);
+    // }
 }
 
 #[tokio::main]
