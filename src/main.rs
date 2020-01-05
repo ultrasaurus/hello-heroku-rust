@@ -4,44 +4,8 @@
 // https://docs.rs/tokio/0.2.6/tokio/task/fn.spawn.html
 use std::env;
 use tokio::io::{AsyncBufReadExt, BufReader};
-use tokio::net::{TcpListener, TcpStream};
+use tokio::net::TcpListener;
 use tokio::prelude::*;
-
-async fn process_socket(socket: TcpStream) {
-    let mut buffed_socket = BufReader::new(socket);
-    let mut request = String::new();
-    let mut result;
-
-    loop {
-        result = buffed_socket.read_line(&mut request).await;
-
-        if let Ok(num_bytes) = result {
-            if num_bytes > 0 {
-                if request.len() >= 4 {
-                    let end_chars = &request[request.len() - 4..];
-                    if end_chars == "\r\n\r\n" {
-                        break;
-                    };
-                }
-            }
-        }
-    }
-    if let Err(e) = result {
-        println!("failed to read from socket, err: {}", e);
-        return;
-    }
-    println!("request: {}", request);
-    let html = "<h1>Hello!</h1>";
-    let response = format!(
-        "HTTP/1.1 200\r\nContent-Length: {}\r\n\r\n{}",
-        html.len(),
-        html
-    );
-    let write_result = buffed_socket.write_all(response.as_bytes()).await;
-    if let Err(e) = write_result {
-        println!("failed to write, err: {}", e);
-    }
-}
 
 #[tokio::main]
 async fn main() {
@@ -60,7 +24,37 @@ async fn main() {
                 let (socket, addr) = listen;
                 println!("socket connection accepted, {}", addr);
                 // Process each socket concurrently.
-                tokio::spawn(async move { process_socket(socket).await });
+                tokio::spawn(async move {
+                    let mut buffed_socket = BufReader::new(socket);
+                    let mut request = String::new();
+                    let mut result;
+                    loop {
+                        result = buffed_socket.read_line(&mut request).await;
+                        if let Ok(num_bytes) = result {
+                            if num_bytes > 0 && request.len() >= 4 {
+                                let end_chars = &request[request.len() - 4..];
+                                if end_chars == "\r\n\r\n" {
+                                    break;
+                                };
+                            }
+                        }
+                    }
+                    if let Err(e) = result {
+                        println!("failed to read from socket, err: {}", e);
+                        return;
+                    }
+                    let html = "<h1>Hello!</h1>";
+                    println!("request: {}", request);
+                    let response = format!(
+                        "HTTP/1.1 200\r\nContent-Length: {}\r\n\r\n{}",
+                        html.len(),
+                        html
+                    );
+                    let write_result = buffed_socket.write_all(response.as_bytes()).await;
+                    if let Err(e) = write_result {
+                        println!("failed to write, err: {}", e);
+                    }
+                });
             }
         }
     }
