@@ -4,6 +4,11 @@ version = "0.1.0"
 authors = ["Sarah Allen <sarah@ultrasaurus.com>"]
 edition = "2018"
 
+[dependencies]
+hyper = "0.13"
+log = "0.4"
+pretty_env_logger = "0.3"
+
 [dependencies.tokio]
 version = "0.2.6"
 # features = ["tcp", "dns", "macros", "io-util", "rt-core"]

@@ -1,60 +1,49 @@
 // example code from:
-// https://docs.rs/tokio/0.2.6/tokio/net/struct.TcpListener.html
-// https://docs.rs/tokio/0.2.6/tokio/net/struct.TcpStream.html
-// https://docs.rs/tokio/0.2.6/tokio/task/fn.spawn.html
+// https://hyper.rs/guides/server/hello-world/
+// https://github.com/emk/rust-buildpack-example-actix/blob/master/src/main.rs
+// https://crates.io/crates/pretty_env_logger
+extern crate pretty_env_logger;
+
+#[macro_use]
+extern crate log;
+
+use hyper::service::{make_service_fn, service_fn};
+use hyper::{Body, Request, Response, Server};
+use std::convert::Infallible;
 use std::env;
-use tokio::net::TcpListener;
-use tokio::prelude::*;
+
+async fn hello(_: Request<Body>) -> Result<Response<Body>, Infallible> {
+    Ok(Response::new(Body::from(
+        "<HTML><H1>Hello World!</H1><HTML>",
+    )))
+}
 
 #[tokio::main]
-async fn main() {
+pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    pretty_env_logger::init();
+
     // Get the port number to listen on (required for heroku deployment).
-    let port = env::var("PORT").unwrap_or_else(|_| "1234".to_string());
+    let port = env::var("PORT")
+        .unwrap_or_else(|_| "1234".to_string())
+        .parse()
+        .expect("PORT must be a number");
 
-    let addr = format!("0.0.0.0:{}", port);
-    let mut listener = TcpListener::bind(addr).await.unwrap();
+    // For every connection, we must make a `Service` to handle all
+    // incoming HTTP requests on said connection.
+    let make_svc = make_service_fn(|_conn| {
+        // This is the `Service` that will handle the connection.
+        // `service_fn` is a helper to convert a function that
+        // returns a Response into a `Service`.
+        async { Ok::<_, Infallible>(service_fn(hello)) }
+    });
 
-    loop {
-        println!("listening on port {}...", port);
-        let result = listener.accept().await;
-        match result {
-            Err(e) => println!("listen.accept() failed, err: {:?}", e),
-            Ok(listen) => {
-                let (socket, addr) = listen;
-                println!("socket connection accepted, {}", addr);
-                // Process each socket concurrently.
-                tokio::spawn(async move {
-                    let mut buffed_socket = tokio::io::BufReader::new(socket);
-                    let mut request = String::new();
-                    let mut result;
-                    loop {
-                        result = buffed_socket.read_line(&mut request).await;
-                        if let Ok(num_bytes) = result {
-                            if num_bytes > 0 && request.len() >= 4 {
-                                let end_chars = &request[request.len() - 4..];
-                                if end_chars == "\r\n\r\n" {
-                                    break;
-                                };
-                            }
-                        }
-                    }
-                    if let Err(e) = result {
-                        println!("failed to read from socket, err: {}", e);
-                        return;
-                    }
-                    let html = "<h1>Hello!</h1>";
-                    println!("request: {}", request);
-                    let response = format!(
-                        "HTTP/1.1 200\r\nContent-Length: {}\r\n\r\n{}",
-                        html.len(),
-                        html
-                    );
-                    let write_result = buffed_socket.write_all(response.as_bytes()).await;
-                    if let Err(e) = write_result {
-                        println!("failed to write, err: {}", e);
-                    }
-                });
-            }
-        }
-    }
+    let addr = ([0, 0, 0, 0], port).into();
+
+    let server = Server::bind(&addr).serve(make_svc);
+
+    info!("Listening on {}", addr);
+
+    server.await?;
+
+    Ok(())
 }
