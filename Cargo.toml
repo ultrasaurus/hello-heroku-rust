@@ -6,5 +6,5 @@ edition = "2018"
 
 [dependencies.tokio]
 version = "0.2.6"
-# features = ["tcp", "dns", "macros", "io-util"]
-features = ["full"]
+features = ["tcp", "dns", "macros", "io-util"]
+# features = ["full"]
