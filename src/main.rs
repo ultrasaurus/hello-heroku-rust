@@ -3,7 +3,6 @@
 // https://docs.rs/tokio/0.2.6/tokio/net/struct.TcpStream.html
 // https://docs.rs/tokio/0.2.6/tokio/task/fn.spawn.html
 use std::env;
-use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::net::TcpListener;
 use tokio::prelude::*;
 
@@ -25,7 +24,7 @@ async fn main() {
                 println!("socket connection accepted, {}", addr);
                 // Process each socket concurrently.
                 tokio::spawn(async move {
-                    let mut buffed_socket = BufReader::new(socket);
+                    let mut buffed_socket = tokio::io::BufReader::new(socket);
                     let mut request = String::new();
                     let mut result;
                     loop {
