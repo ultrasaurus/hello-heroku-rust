@@ -17,8 +17,6 @@ async fn process_socket(socket: TcpStream) {
 
         if let Ok(num_bytes) = result {
             if num_bytes > 0 {
-                println!("read {} bytes", num_bytes);
-                println!("request.len() = {} ", request.len());
                 if request.len() >= 4 {
                     let end_chars = &request[request.len() - 4..];
                     if end_chars == "\r\n\r\n" {
@@ -52,7 +50,6 @@ async fn main() {
 
     let addr = format!("0.0.0.0:{}", port);
     let mut listener = TcpListener::bind(addr).await.unwrap();
-    //let mut socket_futures = Vec::new();
 
     println!("listening on port {}...", port);
     loop {
@@ -60,11 +57,8 @@ async fn main() {
         if let Ok(listen) = result {
             let (socket, addr) = listen;
             println!("socket connection accepted, {}", addr);
-            // socket_futures.push(process_socket(socket));
-            tokio::spawn(async move {
-                // Process each socket concurrently.
-                process_socket(socket).await
-            });
+            // Process each socket concurrently.
+            tokio::spawn(async move { process_socket(socket).await });
         }
     }
 }
