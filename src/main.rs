@@ -7,13 +7,14 @@ use tokio::prelude::*;
 
 async fn process_socket(socket: TcpStream) {
     let mut buffed_socket = tokio::io::BufReader::new(socket);
-    let mut request = String::new();
+    let mut request = Vec::new();
 
-    let read_result = buffed_socket.read_line(&mut request).await;
+    let read_result = buffed_socket.read_to_end(&mut request).await;
     if let Err(e) = read_result {
         println!("failed to read from socket, err: {}", e);
     } else {
-        println!("request: {}", request);
+        let request_str = String::from_utf8_lossy(&request);
+        println!("request: {}", request_str);
         let write_result = buffed_socket
             .write_all(b"HTTP/1.1 200\n\n<h1>Hello!</h1>")
             .await;
@@ -26,7 +27,7 @@ async fn process_socket(socket: TcpStream) {
 #[tokio::main]
 async fn main() -> io::Result<()> {
     // Get the port number to listen on (required for heroku deployment).
-    let port = env::var("PORT").unwrap_or_else(|_| "3000".to_string());
+    let port = env::var("PORT").unwrap_or_else(|_| "1234".to_string());
 
     let addr = format!("0.0.0.0:{}", port);
     let mut listener = TcpListener::bind(addr).await.unwrap();
