@@ -1,6 +1,7 @@
 // example code from:
 // https://docs.rs/tokio/0.2.6/tokio/net/struct.TcpListener.html
 // https://docs.rs/tokio/0.2.6/tokio/net/struct.TcpStream.html
+// https://docs.rs/tokio/0.2.6/tokio/task/fn.spawn.html
 use futures::prelude::*;
 use std::env;
 use tokio::io::{AsyncBufReadExt, BufReader};
@@ -59,10 +60,10 @@ async fn main() {
             let (socket, addr) = listen;
             println!("socket connection accepted, {}", addr);
             // socket_futures.push(process_socket(socket));
-            process_socket(socket);
+            tokio::spawn(async move {
+                // Process each socket concurrently.
+                process_socket(socket).await
+            });
         }
     }
-    // for future in socket_futures {
-    //     future.await;
-    // }
 }
