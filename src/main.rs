@@ -60,7 +60,7 @@ async fn main() {
                 let (socket, addr) = listen;
                 println!("socket connection accepted, {}", addr);
                 // Process each socket concurrently.
-                tokio::spawn(async move { process_socket(socket).await });
+                tokio::spawn(process_socket(socket));
             }
         }
     }
