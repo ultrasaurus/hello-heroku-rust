@@ -1,4 +1,6 @@
+## Hello Rust Heroku -- with async/await & tokio!
 
+Make a new project with cargo
 ```
 cargo new hello_rust --bin
 cd hello_rust
@@ -17,6 +19,7 @@ output:
 Hello, world!
 ```
 
+Use heroku CLI with popular Rust "buildpack" to set up project on heroku: 
 ```
 heroku create --buildpack emk/rust
 ```
@@ -36,3 +39,10 @@ echo "web: ./target/release/hello_rust" >> Procfile
 ```
 cargo add tokio
 ```
+
+Write some code
+
+```
+heroku push origin master
+```
+
