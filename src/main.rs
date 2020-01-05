@@ -2,12 +2,10 @@
 // https://docs.rs/tokio/0.2.6/tokio/net/struct.TcpListener.html
 // https://docs.rs/tokio/0.2.6/tokio/net/struct.TcpStream.html
 // https://docs.rs/tokio/0.2.6/tokio/task/fn.spawn.html
-use futures::prelude::*;
 use std::env;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::prelude::*;
-use tokio::stream::StreamExt;
 
 async fn process_socket(socket: TcpStream) {
     let mut buffed_socket = BufReader::new(socket);
