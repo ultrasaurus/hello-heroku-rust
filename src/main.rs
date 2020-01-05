@@ -54,11 +54,14 @@ async fn main() {
     loop {
         println!("listening on port {}...", port);
         let result = listener.accept().await;
-        if let Ok(listen) = result {
-            let (socket, addr) = listen;
-            println!("socket connection accepted, {}", addr);
-            // Process each socket concurrently.
-            tokio::spawn(async move { process_socket(socket).await });
+        match result {
+            Err(e) => println!("listen.accept() failed, err: {:?}", e),
+            Ok(listen) => {
+                let (socket, addr) = listen;
+                println!("socket connection accepted, {}", addr);
+                // Process each socket concurrently.
+                tokio::spawn(async move { process_socket(socket).await });
+            }
         }
     }
 }
